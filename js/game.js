@@ -99,6 +99,17 @@ class Game {
         this.ctx.restore();
 
         // Draw UI / HUD if needed
+        this.updateHUD();
+    }
+
+    updateHUD() {
+        const speedEl = document.getElementById('speedometer');
+        if (speedEl) {
+            // Convert pixels/sec to arbitrary km/h
+            // 800 roughly -> 200 km/h
+            const kmh = Math.abs(Math.round(this.car.speed / 4));
+            speedEl.innerText = `${kmh} km/h`;
+        }
     }
 }
 

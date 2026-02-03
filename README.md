@@ -13,7 +13,10 @@ A 2D open-world car game optimized for mobile browsers, built with vanilla JavaS
     - **Drift**: Slide around corners with smoke effects.
     - **Boost**: Temporary speed burst.
     - **Auto-Collision**: Bouncing off obstacles.
+    - **Auto-Collision**: Bouncing off obstacles.
 - **Mobile Controls**: On-screen D-Pad and action buttons.
+- **UI**:
+    - **Speedometer**: Real-time speed display in km/h.
 
 ## Documentation
 - **[Implementation Plan](implementation_plan.md)**: Details the architecture and file structure.

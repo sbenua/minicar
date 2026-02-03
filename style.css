@@ -154,3 +154,120 @@ canvas {
     backdrop-filter: blur(2px);
     border: 1px solid rgba(255, 255, 255, 0.3);
 }
+
+/* Mobile-only: fixed control positions for portrait phones */
+@media (max-width: 767px) {
+    /* Keep the container full-width but let children be positioned to edges */
+    #controls {
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: auto;
+        padding: 0;
+        pointer-events: none; /* container lets children receive touches */
+        z-index: 50;
+    }
+
+    /* Config buttons (DRIFT / BOOST / NOS) horizontally centered like desktop but fixed above other controls */
+    .control-row:not(.middle) {
+        position: fixed;
+        left: 50%;
+        bottom: calc(18px + 72px + 12px); /* above steers and bottom buttons */
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: row;
+        gap: 12px;
+        align-items: center;
+        pointer-events: auto;
+        z-index: 60;
+        background: transparent;
+        width: auto;
+    }
+
+    /* D-Pad container collapsed; we'll position children individually */
+    .dpad {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 0;
+        height: 0;
+        pointer-events: none;
+    }
+
+    /* Steer left (use existing #btn-left) placed on left side */
+    #btn-left {
+        position: fixed;
+        left: calc(env(safe-area-inset-left, 0px) + 6vw);
+        bottom: 128px;
+        width: 48px;
+        height: 720px;
+        border-radius: 12px;
+        pointer-events: auto;
+        z-index: 70;
+        opacity: 0.2; /* Make it almost invisible but still touchable */
+    }
+
+    /* Steer right (use existing #btn-right) placed on right side */
+    #btn-right {
+        position: fixed;
+        right: calc(env(safe-area-inset-right, 0px) + 6vw);
+        bottom: 128px;
+        width: 48px;
+        height: 720px;
+        border-radius: 12px;
+        pointer-events: auto;
+        z-index: 70;
+        opacity: 0.2; /* Make it almost invisible but still touchable */
+    }
+
+    /* Brake on left bottom (use existing #btn-down) */
+    #btn-down {
+        position: fixed;
+        left: calc(env(safe-area-inset-left, 0px) + 6vw);
+        bottom: 18px;
+        width: 72px;
+        height: 72px;
+        border-radius: 14px;
+        pointer-events: auto;
+        z-index: 70;
+    }
+
+    /* Gas on right bottom (use existing #btn-up) */
+    #btn-up {
+        position: fixed;
+        right: calc(env(safe-area-inset-right, 0px) + 6vw);
+        bottom: 18px;
+        width: 72px;
+        height: 72px;
+        border-radius: 14px;
+        pointer-events: auto;
+        z-index: 70;
+    }
+
+    .vertical-dpad {
+        gap: 8px;
+    }
+
+    /* Balanced touch target sizes */
+    .control-btn {
+        width: 58px;
+        height: 58px;
+        padding: 0;
+        font-size: 13px;
+        border-radius: 12px;
+    }
+
+    .dpad-btn {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+    }
+
+    /* Make sure the speedometer doesn't overlap controls on small screens */
+    #speedometer {
+        top: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 18px;
+    }
+}

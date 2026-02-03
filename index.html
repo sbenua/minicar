@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Open World Car Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="speedometer">0 km/h</div>
+
+    <div id="controls">
+        <div class="control-row">
+            <button id="btn-drift" class="control-btn" data-action="drift">DRIFT</button>
+            <button id="btn-boost" class="control-btn" data-action="boost">BOOST</button>
+            <button id="btn-nos" class="control-btn" data-action="nos">NOS</button>
+        </div>
+        <div class="control-row middle">
+            <div class="dpad">
+                <button id="btn-left" class="control-btn dpad-btn" data-action="left">◀</button>
+                <div class="vertical-dpad">
+                    <button id="btn-up" class="control-btn dpad-btn" data-action="up">▲</button>
+                    <button id="btn-down" class="control-btn dpad-btn" data-action="down">▼</button>
+                </div>
+                <button id="btn-right" class="control-btn dpad-btn" data-action="right">▶</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Scripts -->
+    <script src="js/effects.js"></script>
+    <script src="js/world.js"></script>
+    <script src="js/car.js"></script>
+    <script src="js/input.js"></script>
+    <script src="js/game.js"></script>
+</body>
+
+</html>

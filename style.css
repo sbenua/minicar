@@ -1,0 +1,156 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    /* Prevent browser zooming/panning */
+}
+
+body {
+    overflow: hidden;
+    background-color: #222;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+}
+
+#controls {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+    pointer-events: none;
+    /* Let touches pass through to buttons but not container */
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.control-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    pointer-events: auto;
+}
+
+.control-row.middle {
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.control-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: bold;
+    backdrop-filter: blur(5px);
+    cursor: pointer;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.1s, transform 0.1s;
+}
+
+.control-btn:active,
+.control-btn.active {
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(0.95);
+}
+
+#btn-boost {
+    background: rgba(255, 50, 50, 0.3);
+    border-color: rgba(255, 50, 50, 0.6);
+    margin-right: 20px;
+}
+
+#btn-drift {
+    background: rgba(50, 100, 255, 0.3);
+    border-color: rgba(50, 100, 255, 0.6);
+    margin-left: 20px;
+}
+
+#btn-nos {
+    background: rgba(255, 165, 0, 0.3);
+    /* Orange */
+    border-color: rgba(255, 165, 0, 0.6);
+    margin-left: 20px;
+}
+
+#btn-nos.disabled {
+    background: rgba(100, 100, 100, 0.3);
+    border-color: rgba(100, 100, 100, 0.3);
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: default;
+}
+
+.dpad {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.vertical-dpad {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.dpad-btn {
+    border-radius: 10px;
+    font-size: 18px;
+}
+
+/* Landscape/Desktop tweaks */
+@media (min-width: 768px) {
+    #controls {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+
+    .control-row {
+        width: auto;
+    }
+
+    .dpad {
+        order: 1;
+    }
+
+    /* Move drift/boost to right side */
+    .control-row:not(.middle) {
+        order: 2;
+        gap: 15px;
+    }
+}
+
+#speedometer {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    font-family: 'Segoe UI', sans-serif;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.4);
+    padding: 5px 15px;
+    border-radius: 20px;
+    pointer-events: none;
+    backdrop-filter: blur(2px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}

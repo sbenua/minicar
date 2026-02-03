@@ -52,3 +52,27 @@ generate() {
 - Confirmed `game` object exists.
 - Confirmed assets (Car, Tree, House, etc.) load correctly.
 - Gameplay functionality restored.
+
+## Issue: Game Crash (Infinite loop / Black Screen)
+**Date:** 2026-02-03
+**Severity:** Critical
+
+### Symptoms
+- Game starts but immediately halts or shows a black screen.
+- Console error: `TypeError: this.world.update is not a function`.
+
+### Root Cause Analysis
+The `js/game.js` main loop was updated to call `this.world.update()` to handle infinite world rendering, but the `World` class in `js/world.js` had not yet been updated to include this method. This mismatch caused the game loop to crash on the first frame.
+
+### Resolution
+Implemented the proper `update(carY)` method in `js/world.js` to handle object recycling and confirmed the `generate` method sets up the necessary road properties (`roadX`, `roadWidth`).
+
+**Fix in `js/world.js`:**
+Added `update` method:
+```javascript
+update(carY) {
+    const viewBuffer = 4000;
+    // Logic to recycle objects from behind to ahead of the car
+    // ...
+}
+```

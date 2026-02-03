@@ -6,10 +6,13 @@ A 2D open-world car game optimized for mobile browsers, built with vanilla JavaS
 *(Note: Screenshot available in local walkthrough artifact)*
 
 ## Features
-- **Procedural World**: Randomly generated map with trees, houses, and stones.
+- **Procedural Infinite World**:
+    - **Endless Road**: A single straight highway that loops infinitely.
+    - **Dynamic Environment**: Trees and stones are recycled as you drive, creating an endless landscape.
 - **Arcade Physics**:
     - **Drift**: Slide around corners with smoke effects.
     - **Boost**: Temporary speed burst.
+    - **Auto-Collision**: Bouncing off obstacles.
 - **Mobile Controls**: On-screen D-Pad and action buttons.
 
 ## Documentation

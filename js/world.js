@@ -19,108 +19,103 @@ class World {
         this.game.car.x = cx;
         this.game.car.y = cy;
 
-        // 1. Generate Roads (Straight paths)
-        // We'll create a grid of roads or random straight segments
-        this.roads = [];
-        const roadWidth = 200;
-        this.totalRoads = 10;
+        // 1. Setup Infinite Road
+        this.roadWidth = 400; // Wider main highway
+        this.roadX = cx - this.roadWidth / 2; // Fixed X position for vertical road
+        this.roads = []; // Not used for rendering infinite road, but kept for compatibility logic if needed
 
-        // Always have one road passing near start
-        this.roads.push({
-            x: cx - 1000, y: cy, w: 2000, h: roadWidth, type: 'horizontal'
-        });
-        this.roads.push({
-            x: cx, y: cy - 1000, w: roadWidth, h: 2000, type: 'vertical'
-        });
+        // 2. Place Objects (Initial Pool)
+        // We initialize objects around the start area (-3000 to +3000 vertical range)
+        const count = 200; // Smaller active pool, we recycle them
+        this.objectSpawnRange = 3000; // Distance ahead/behind to spawn
 
-        // Add random roads
-        for (let i = 0; i < this.totalRoads; i++) {
-            // Random horizontal or vertical
-            if (Math.random() > 0.5) {
-                // Horizontal
-                const rx = Math.random() * (this.width - 2000);
-                const ry = Math.random() * (this.height - roadWidth);
-                this.roads.push({ x: rx, y: ry, w: 2000 + Math.random() * 2000, h: roadWidth, type: 'horizontal' });
-            } else {
-                // Vertical
-                const rx = Math.random() * (this.width - roadWidth);
-                const ry = Math.random() * (this.height - 2000);
-                this.roads.push({ x: rx, y: ry, w: roadWidth, h: 2000 + Math.random() * 2000, type: 'vertical' });
+        // Clear existing objects
+        this.objects = [];
+
+        // Generate initial objects
+        for (let i = 0; i < count; i++) {
+            this.spawnObject(cx, cy, this.objectSpawnRange, true);
+        }
+    }
+
+    spawnObject(refX, refY, range, initial = false) {
+        // Random position within range of reference Y
+        const yOffset = (Math.random() - 0.5) * 2 * range;
+        const x = (Math.random() - 0.5) * this.width * 2 + refX; // Wide X spread
+        const y = refY + yOffset;
+
+        // Skip if too close to road (Horizontal clearance)
+        if (x > this.roadX - 100 && x < this.roadX + this.roadWidth + 100) return;
+
+        // Skip safe start zone
+        if (initial) {
+            const dx = x - refX;
+            const dy = y - refY;
+            if (dx * dx + dy * dy < 300 * 300) return;
+        }
+
+        const rand = Math.random();
+        let type = 'tree';
+        let scale = 0.3 + Math.random() * 0.3;
+        let radius = 30 * scale;
+
+        if (rand > 0.7) {
+            type = 'stone';
+            scale = 0.3 + Math.random() * 0.3;
+            radius = 35 * scale;
+        } else if (rand > 0.95) {
+            type = 'house';
+            scale = 0.6 + Math.random() * 0.4;
+            radius = 100 * scale;
+        }
+
+        // Check for overlaps with existing objects
+        for (const obj of this.objects) {
+            const dx = obj.x - x;
+            const dy = obj.y - y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < obj.radius + radius) {
+                // Allow tree on stone exception if needed, strictly avoid for now
+                if (type === 'tree' && obj.type === 'stone') continue;
+                return; // Overlap
             }
         }
 
-        // 2. Place Objects
-        const count = 3000;
-        const safeRadius = 300;
+        this.objects.push({
+            x: x,
+            y: y,
+            type: type,
+            angle: type === 'house' ? 0 : Math.random() * Math.PI * 2,
+            scale: scale,
+            radius: radius
+        });
+    }
 
-        // Simple radius check function
-        const checkOverlap = (x, y, radius) => {
-            // Check against roads
-            for (let r of this.roads) {
-                if (x + radius > r.x && x - radius < r.x + r.w &&
-                    y + radius > r.y && y - radius < r.y + r.h) {
-                    return true; // Overlaps road
+    update(carY) {
+        // Recycle objects that are too far behind or ahead
+        const viewBuffer = 4000; // Keep objects within this range of carY
+
+        for (let i = 0; i < this.objects.length; i++) {
+            const obj = this.objects[i];
+            const dy = obj.y - carY;
+
+            if (Math.abs(dy) > viewBuffer) {
+                // Object is too far, move it to the other side
+
+                // If car is moving "up" (decreasing Y), objects below (pos Y) fall out of view.
+                // We move them to top (neg Y relative to car).
+                const sign = dy > 0 ? -1 : 1;
+
+                // New Y: Ahead of car in direction of movement logic
+                obj.y = carY + sign * (viewBuffer - 100 + Math.random() * 500);
+
+                // Randomize X again
+                obj.x = this.roadX + (Math.random() - 0.5) * 5000;
+
+                // Ensure it doesn't land on road
+                if (obj.x > this.roadX - 100 && obj.x < this.roadX + this.roadWidth + 100) {
+                    obj.x += 600; // Push away from road
                 }
-            }
-
-            // Check against other objects
-            // Note: Trees can overlap stones (as per prompt "tree on top of stone is fine")
-            // But let's keep it simple: Objects shouldn't overlap if possible to look nice
-            // Prompt says: "dont make each of them on top of each other... but tree on top of stone is fine"
-            // Let's implement general avoidance but allow small overlap or just strict avoidance for simplicity first.
-            // "Tree on top of stone is fine" -> We can ignore collision check if (new=tree and old=stone)
-
-            for (let obj of this.objects) {
-                const dx = obj.x - x;
-                const dy = obj.y - y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                const minDist = obj.radius + radius;
-
-                // If overlap
-                if (dist < minDist) {
-                    // Check exception: Tree on Stone
-                    if (this.currentType === 'tree' && obj.type === 'stone') return false;
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        for (let i = 0; i < count; i++) {
-            const x = Math.random() * this.width;
-            const y = Math.random() * this.height;
-
-            // Check start safe zone
-            const dx = x - cx;
-            const dy = y - cy;
-            if (dx * dx + dy * dy < safeRadius * safeRadius) continue;
-
-            const rand = Math.random();
-            let type = 'tree';
-            let scale = 0.3 + Math.random() * 0.3; // Smaller scale (0.3 to 0.6)
-            let radius = 30 * scale; // Approximate collision radius
-
-            if (rand > 0.7) {
-                type = 'stone';
-                scale = 0.3 + Math.random() * 0.3;
-                radius = 35 * scale;
-            } else if (rand > 0.95) {
-                type = 'house';
-                scale = 0.6 + Math.random() * 0.4;
-                radius = 100 * scale;
-            }
-
-            this.currentType = type; // Hack for overlap check closure
-
-            if (!checkOverlap(x, y, radius)) {
-                this.objects.push({
-                    x: x,
-                    y: y,
-                    type: type,
-                    angle: type === 'house' ? 0 : Math.random() * Math.PI * 2,
-                    scale: scale,
-                    radius: radius
-                });
             }
         }
     }
@@ -134,10 +129,6 @@ class World {
         const endRow = startRow + Math.ceil(this.game.height / this.tileSize) + 1;
 
         const ground = this.game.assets.ground;
-        // Re-use road as ground if needed or mix them. 
-        // For open world car game, usually "ground" is grass and we have roads.
-        // For this simple version, let's just tile grass everywhere for now, 
-        // effectively "offroad" everywhere.
 
         if (ground) {
             for (let c = startCol; c <= endCol; c++) {
@@ -147,45 +138,51 @@ class World {
             }
         }
 
-        // 1.5 Draw Roads
+        // 1.5 Draw Infinite Road
         const roadImg = this.game.assets.road;
-        if (roadImg && this.roads) {
-            this.roads.forEach(road => {
-                // Optimization: Check road bounds with camera
-                if (road.x + road.w < camX - this.game.width / 2 || road.x > camX + this.game.width / 2 ||
-                    road.y + road.h < camY - this.game.height / 2 || road.y > camY + this.game.height / 2) return;
+        if (roadImg && this.roadWidth) {
+            // Draw road strip that covers visible view
+            // We want road to go from visible Top to visible Bottom
+            const viewT = camY - this.game.height / 2;
+            const viewB = camY + this.game.height / 2;
 
-                // Tile the road texture along the segment
-                ctx.save();
-                ctx.beginPath();
-                ctx.rect(road.x, road.y, road.w, road.h);
-                ctx.clip(); // Clip to road rect
+            const rStartRow = Math.floor(viewT / 256);
+            const rEndRow = Math.floor(viewB / 256) + 1;
 
-                // Draw tiles covering the rect
-                const rStartCol = Math.floor(road.x / 256);
-                const rEndCol = Math.floor((road.x + road.w) / 256) + 1;
-                const rStartRow = Math.floor(road.y / 256);
-                const rEndRow = Math.floor((road.y + road.h) / 256) + 1;
+            // Road X is fixed
+            const rX = this.roadX;
+            const rW = this.roadWidth;
 
-                for (let c = rStartCol; c < rEndCol; c++) {
-                    for (let r = rStartRow; r < rEndRow; r++) {
-                        ctx.drawImage(roadImg, c * 256, r * 256, 256, 256);
-                    }
+            // Tile vertical road segments
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(rX, viewT - 100, rW, (viewB - viewT) + 200); // Clip area
+            ctx.clip();
+
+            // Draw enough tiles to cover height
+            const cStart = Math.floor(rX / 256);
+            const cEnd = Math.floor((rX + rW) / 256) + 1;
+
+            for (let r = rStartRow - 1; r <= rEndRow; r++) {
+                for (let c = cStart; c < cEnd; c++) {
+                    ctx.drawImage(roadImg, c * 256, r * 256, 256, 256);
                 }
-                ctx.restore();
+            }
+            ctx.restore();
 
-                // Optional: Draw borders
-                ctx.strokeStyle = '#555';
-                ctx.lineWidth = 5;
-                ctx.strokeRect(road.x, road.y, road.w, road.h);
-            });
+            // Borders
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(rX, viewT);
+            ctx.lineTo(rX, viewB);
+            ctx.moveTo(rX + rW, viewT);
+            ctx.lineTo(rX + rW, viewB);
+            ctx.stroke();
         }
 
         // 2. Draw Objects
         // Optimization: Only draw objects near the camera
-        // Simple distance check or grid partition. For 2000 objects, simple traversal is okay-ish on modern JS,
-        // but let's check basic bounds.
-
         const viewL = camX - this.game.width / 2 - 200;
         const viewR = camX + this.game.width / 2 + 200;
         const viewT = camY - this.game.height / 2 - 200;
@@ -197,9 +194,6 @@ class World {
                 if (img) {
                     ctx.save();
                     ctx.translate(obj.x, obj.y);
-                    // Trees/Stones might rotate, Houses usually don't or do?
-                    // Let's rotate stones and trees. Houses fixed? 
-                    // Let's rotate everything for variety except houses maybe?
                     if (obj.type !== 'house') ctx.rotate(obj.angle);
 
                     const w = img.width * obj.scale;

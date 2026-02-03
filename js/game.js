@@ -69,6 +69,7 @@ class Game {
 
     update(dt) {
         this.car.update(dt);
+        this.world.update(this.car.y); // Update infinite world generation
         this.effects.update(dt);
         // Camera follow logic can be here or in drawing
     }

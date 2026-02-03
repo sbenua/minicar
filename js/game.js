@@ -107,7 +107,7 @@ class Game {
         if (speedEl) {
             // Convert pixels/sec to arbitrary km/h
             // 800 roughly -> 200 km/h
-            const kmh = Math.abs(Math.round(this.car.speed / 4));
+            const kmh = Math.abs(Math.round(this.car.speed / 10));
             speedEl.innerText = `${kmh} km/h`;
         }
     }

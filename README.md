@@ -2,8 +2,7 @@
 
 A 2D open-world car game optimized for mobile browsers, built with vanilla JavaScript and HTML5 Canvas.
 
-![Game Check](https://github.com/user-attachments/assets/placeholder-screenshot)
-*(Note: Screenshot available in local walkthrough artifact)*
+![Game Check]([https://github.com/user-attachments/assets/placeholder-screenshot](https://github.com/sbenua/minicar/raw/main/screenshots/nos_verification.png))
 
 ## Features
 - **Procedural Infinite World**:
